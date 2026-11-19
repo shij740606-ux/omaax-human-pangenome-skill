@@ -164,7 +164,7 @@ def run(config):
         threads, sample = str(config["threads"]), config["sample"]
         step("giraffe", ["vg", "giraffe", "-t", threads, "-Z", files["gbz"], "-d", dist, "-m", files["min"], "-z", files["zipcodes"], "-f", config["r1"], "-f", config["r2"], "-N", sample, "-R", sample, "-b", "default"], "mapped.gam")
         step("graph-stats", ["vg", "stats", "-a", output / "mapped.gam"], "graph-stats.txt")
-        step("surject", ["vg", "surject", "-t", threads, "-x", files["gbz"], "--read-length", "short", "--left-align", "--into-paths", paths_file, "-N", sample, "-R", sample, "-b", output / "mapped.gam"], "projected.unsorted.bam")
+        step("surject", ["vg", "surject", "-t", threads, "-x", files["gbz"], "--read-length", "short", "--left-align", "--into-paths", paths_file, "-N", sample, "-R", sample, "-i", "-b", output / "mapped.gam"], "projected.unsorted.bam")
         step("sort", ["samtools", "sort", "-@", threads, "-T", output / "sort-tmp", "-o", output / "projected.bam", output / "projected.unsorted.bam"])
         bam = output / "projected.bam"
         step("quickcheck", ["samtools", "quickcheck", "-v", bam])
@@ -184,9 +184,11 @@ def run(config):
         require(samples and set(samples) == {sample}, "BAM 样本标识不匹配")
         primary = int(capture(["samtools", "view", "-c", "-F", "2304", bam]))
         mapped = int(capture(["samtools", "view", "-c", "-F", "2308", bam]))
+        paired = int(capture(["samtools", "view", "-c", "-F", "2304", "-f", "1", bam]))
         require(primary == checked["pairs"] * 2 and mapped > 0, "primary reads 数异常或无读段映射到选定参考")
+        require(paired == primary, "投影 BAM 未完整保留双端标记")
         require(Path(str(bam) + ".csi").stat().st_size > 0, "BAM 索引为空")
-        acceptance = {"passed": True, "scope": "mapping-only", "coordinate_system": checked["reference"]["coordinate_system"], "primary_reads": primary, "mapped_reads": mapped, "mapped_fraction": mapped / primary, "dictionary": actual}
+        acceptance = {"passed": True, "scope": "mapping-only", "coordinate_system": checked["reference"]["coordinate_system"], "primary_reads": primary, "paired_reads": paired, "mapped_reads": mapped, "mapped_fraction": mapped / primary, "dictionary": actual}
         write_json(output / "acceptance.json", acceptance)
         (output / "report.md").write_text(f"# 泛基因组图比对结果\n\n样本：{sample}\n\n坐标：{acceptance['coordinate_system']}\n\n输入 {checked['pairs']} 对 reads；primary {primary} 条；映射到选定参考 {mapped} 条（{mapped / primary:.2%}）。\n\n产物：mapped.gam、projected.bam / .csi、flagstat.txt、graph-stats.txt、idxstats.txt、run_manifest.json、acceptance.json。\n\n本次完成图比对与投影，没有执行变异调用或临床解释。映射率不是准确率。失败/调试日志和中间文件均保留在本目录。\n", encoding="utf-8")
         state["status"] = "passed"
