@@ -155,7 +155,8 @@ def run(config):
     try:
         files = {key: Path(value["path"]) for key, value in checked["reference"]["files"].items()}
         dist = output / "reference.dist"
-        shutil.copyfile(files["dist"], dist)
+        # vg checks dependency mtimes; preserve them when isolating its writable index.
+        shutil.copy2(files["dist"], dist)
         require(sha256(dist) == checked["reference"]["files"]["dist"]["sha256"], "距离索引副本校验失败")
         dist.chmod(0o444)
         paths_file = output / "reference-paths.txt"

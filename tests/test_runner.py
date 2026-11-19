@@ -120,6 +120,7 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(json.loads((out / "acceptance.json").read_text(encoding="utf-8"))["passed"])
         self.assertEqual(json.loads((out / "run_manifest.json").read_text(encoding="utf-8"))["status"], "failed")
         self.assertEqual(before, {p.name: runner.sha256(p) for p in self.root.iterdir() if p.is_file()})
+        self.assertEqual((out / "reference.dist").stat().st_mtime_ns, (self.root / "dist").stat().st_mtime_ns)
         # Restore permission only on this test's private copy, for Windows temp cleanup.
         (out / "reference.dist").chmod(0o600)
 
