@@ -1,0 +1,4 @@
+interface:
+  display_name: "人类泛基因组重分析"
+  short_description: "在 Linux 服务器核对人类双端 WGS 与图参考，输出比对结果和质量统计"
+  default_prompt: "使用 $human-pangenome-reanalysis 检查我的 WGS 数据和参考包，在新任务目录执行图比对并报告质量统计。"

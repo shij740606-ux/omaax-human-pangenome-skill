@@ -1,0 +1,15 @@
+{
+  "label": "Replace with exact graph release and panel description",
+  "source": "Replace with the official reference resource URL",
+  "coordinate_system": "GRCh38",
+  "vg_version": "1.78.0",
+  "paths": ["chr1"],
+  "files": {
+    "gbz": {"path": "/refs/graph.gbz", "sha256": "REPLACE_WITH_SHA256"},
+    "dist": {"path": "/refs/graph.dist", "sha256": "REPLACE_WITH_SHA256"},
+    "min": {"path": "/refs/graph.shortread.withzip.min", "sha256": "REPLACE_WITH_SHA256"},
+    "zipcodes": {"path": "/refs/graph.shortread.zipcodes", "sha256": "REPLACE_WITH_SHA256"},
+    "fasta": {"path": "/refs/reference.fa", "sha256": "REPLACE_WITH_SHA256"},
+    "fai": {"path": "/refs/reference.fa.fai", "sha256": "REPLACE_WITH_SHA256"}
+  }
+}

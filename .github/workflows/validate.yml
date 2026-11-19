@@ -1,0 +1,37 @@
+name: Validate skill
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Install pinned vg and distribution test tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y samtools tabix
+          curl --fail --location --retry 3 https://github.com/vgteam/vg/releases/download/v1.78.0/vg -o /tmp/vg
+          echo '5ddfee24c34f3656b0e71a5c2ffb65275781a7353d9147ae6b5d7323029c7799  /tmp/vg' | sha256sum -c -
+          chmod +x /tmp/vg
+          sudo mv /tmp/vg /usr/local/bin/vg
+          vg version
+          samtools --version
+      - name: Real graph mapping and input preservation smoke test
+        run: python3 tests/smoke.py "$RUNNER_TEMP/pangenome-smoke"
+      - name: Keep validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pangenome-validation
+          path: |
+            ${{ runner.temp }}/pangenome-smoke/task.json
+            ${{ runner.temp }}/pangenome-smoke/bundle.json
+            ${{ runner.temp }}/pangenome-smoke/result/*.json
+            ${{ runner.temp }}/pangenome-smoke/result/*.txt
+            ${{ runner.temp }}/pangenome-smoke/result/*.md
+            ${{ runner.temp }}/pangenome-smoke/result/*.log
+          if-no-files-found: ignore

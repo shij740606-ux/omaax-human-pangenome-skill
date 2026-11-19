@@ -1,0 +1,9 @@
+{
+  "sample": "sample01",
+  "r1": "/data/sample01_R1.fastq.gz",
+  "r2": "/data/sample01_R2.fastq.gz",
+  "output": "/work/project/pangenome-run-001",
+  "threads": 8,
+  "min_free_gb": 100,
+  "reference_manifest": "/refs/matched-bundle/bundle.json"
+}
